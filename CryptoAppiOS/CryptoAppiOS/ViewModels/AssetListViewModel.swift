@@ -1,4 +1,5 @@
 import Foundation
+import Dependencies
 
 @Observable
 final class AssetListViewModel {
@@ -6,21 +7,41 @@ final class AssetListViewModel {
     var errorMessage: String?
     var assets: [Asset] = []
     
+    @ObservationIgnored
+    @Dependency(\.assetsApiClient) var apiClient
+    
+    var clientConfigured = false
+    
+    func configClient() {
+        clientConfigured = true
+    }
+    
     func fetchAssets() async {
-        let urlSession = URLSession.shared
-        
-        guard let url = URL(string: "https://b0b5e320-592e-47bc-8edf-c7f7b9e03407.mock.pstmn.io/v3/assets") else {
-            errorMessage = "Invalid URL"
-            return
-        }
-                
         do {
-            let (data, _) = try await urlSession.data(for: URLRequest(url: url))
-            let assetsResponse = try JSONDecoder().decode(AssetsResponse.self, from: data)
-            self.assets = assetsResponse.data
+            assets = try await apiClient.fetchAllAssets()
+        } catch let error as NetworkingError {
+            errorMessage = error.localizedDescription
         } catch {
-            print(error.localizedDescription)
             errorMessage = error.localizedDescription
         }
     }
 }
+
+//
+//final class AAViewModel: ObservableObject {
+//
+//    @Published var assets: [Asset] = []
+//    @Published var errorMessage: String?
+//
+//    var apiClient: AssetsApiClient
+//
+//    init(assets: [Asset], errorMessage: String? = nil, apiClient: AssetsApiClient) {
+//        self.assets = assets
+//        self.errorMessage = errorMessage
+//        self.apiClient = apiClient
+//    }
+//
+//    func fetchAssets() async {
+//
+//    }
+//}
