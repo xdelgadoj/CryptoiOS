@@ -1,7 +1,8 @@
+
 import Testing
 import Dependencies
 
-@testable import Crypto_iOS
+@testable import CryptoAppiOS
 
 var assetStub: Asset = .init(
     id: "bitcoin",
